@@ -4,19 +4,16 @@ import io
 import os
 from typing import Any
 
-# Это уже делается в conftest.py, но лучше перестраховаться
-os.environ["CUDA_VISIBLE_DEVICES"] = ""
-
-# Использую отложенный импорт, чтобы conftest.py успел настроить окружение
 import pytest
 
-# Теперь импортируем torch
 import torch
 from fastapi.testclient import TestClient
 from PIL import Image
 
 from pneumonia_classifier.api.main import app
 from pneumonia_classifier.models.resnet import create_model
+
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 @pytest.fixture
 def client() -> TestClient:
