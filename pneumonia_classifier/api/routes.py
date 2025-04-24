@@ -3,14 +3,12 @@
 import io
 from typing import Any, Dict
 
-import torch
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from PIL import Image
 
 # Using module import instead of a specific variable
 import pneumonia_classifier.api.main as api_main
 from pneumonia_classifier.models.resnet import predict
-from pneumonia_classifier.utils import get_device, process_image
 
 router = APIRouter()
 
