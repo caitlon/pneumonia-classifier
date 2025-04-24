@@ -15,6 +15,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Fetch complete history to ensure all files are checked out
     
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
@@ -25,9 +27,15 @@ jobs:
       run: |
         echo "Repository structure:"
         ls -la
+        echo "Tests directory structure:"
+        ls -la tests/ || echo "Tests directory not found"
+        echo "Test files count:"
+        find tests -name "test_*.py" | wc -l
+        echo "Test files:"
+        find tests -name "test_*.py"
         echo "pneumonia_classifier directory structure:"
         ls -la pneumonia_classifier/
-        echo "Check for models directory:"
+        echo "pneumonia_classifier/models directory:"
         ls -la pneumonia_classifier/models/ || echo "Models directory not found"
         
     - name: Install dependencies
@@ -51,6 +59,11 @@ jobs:
         python -c "import pneumonia_classifier.models.resnet; print('Resnet module successfully imported')"
         python -c "import sys; print(sys.path)"
         
+    - name: Debug pytest collection
+      run: |
+        echo "Pytest collected tests:"
+        python -m pytest --collect-only -v
+        
     - name: Test with pytest
       run: |
-        python -m pytest 
+        python -m pytest -v 
