@@ -67,4 +67,11 @@ python_classes = "Test*"
 train = "scripts.train:main"
 api = "scripts.api:main"
 deploy = "scripts.deploy_to_azure:main"
-build = "scripts.build_and_push:main" 
+build = "scripts.build_and_push:main"
+
+[tool.pytest]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::UserWarning",
+]
+testpaths = ["tests"] 

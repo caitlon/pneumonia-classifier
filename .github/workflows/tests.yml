@@ -1,0 +1,44 @@
+name: Run Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    env:
+      CUDA_VISIBLE_DEVICES: ""
+      PYTHONWARNINGS: "ignore::UserWarning"
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Install Poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+        
+    - name: Install dependencies
+      run: |
+        poetry install
+        
+    - name: Lint with flake8
+      run: |
+        poetry run flake8 pneumonia_classifier scripts tests
+        
+    - name: Type check with mypy
+      run: |
+        poetry run mypy pneumonia_classifier scripts tests
+        
+    - name: Test with pytest
+      run: |
+        echo "Using CPU-only mode for PyTorch"
+        poetry run pytest tests 
