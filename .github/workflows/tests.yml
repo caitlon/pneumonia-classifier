@@ -13,6 +13,10 @@ jobs:
     env:
       CUDA_VISIBLE_DEVICES: ""
       PYTHONWARNINGS: "ignore::UserWarning"
+      # Force PyTorch to use CPU only
+      FORCE_CUDA: "0"
+      USE_CUDA: "0"
+      PYTORCH_ENABLE_MPS_FALLBACK: "1"
     
     steps:
     - uses: actions/checkout@v3
@@ -28,6 +32,9 @@ jobs:
         
     - name: Install dependencies
       run: |
+        # Install CPU-only version of PyTorch before the rest of dependencies
+        pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+        poetry config virtualenvs.create false
         poetry install
         
     - name: Lint with flake8
@@ -40,5 +47,5 @@ jobs:
         
     - name: Test with pytest
       run: |
-        echo "Using CPU-only mode for PyTorch"
+        echo "Running tests in CPU-only mode for PyTorch"
         poetry run pytest tests 
