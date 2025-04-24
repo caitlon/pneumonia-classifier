@@ -191,7 +191,7 @@ def get_class_weights(data_dir: Union[str, Path] = DATA_DIR) -> torch.Tensor:
     # Normalize weights
     weights = weights / weights.sum() * len(weights)
     
-    # Явно указываем тип
+    # Explicitly specify the type
     weights_tensor: torch.Tensor = weights
     
     return weights_tensor

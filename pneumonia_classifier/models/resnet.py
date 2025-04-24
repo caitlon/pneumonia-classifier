@@ -16,7 +16,7 @@ from pneumonia_classifier.config import (
     NORMALIZE_STD,
 )
 
-# Правильный регистр имен классов для API
+# Proper case for class names in API
 API_CLASS_NAMES = ["Normal", "Pneumonia"]
 
 
@@ -121,7 +121,7 @@ def predict(image_input: Union[str, Image.Image, torch.Tensor], model: Optional[
     max_prob, pred_idx = torch.max(probabilities, 0)
     index = pred_idx.item()
     
-    # Используем имена классов с правильным регистром для API
+    # Use class names with proper case for API
     class_name = API_CLASS_NAMES[index]
     
     return {

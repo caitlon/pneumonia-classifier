@@ -20,7 +20,7 @@ def client() -> TestClient:
 @pytest.fixture
 def mock_model(monkeypatch: pytest.MonkeyPatch, cpu_device: torch.device) -> None:
     """Mock model for testing."""
-    # Create model - используя CPU
+    # Create model - using CPU
     test_model = create_model()
     test_model = test_model.to(cpu_device)
 

@@ -31,7 +31,7 @@ def test_empty_file(client: TestClient) -> None:
     response = client.post(
         "/predict", files={"file": ("empty.jpg", empty_file, "image/jpeg")}
     )
-    # Текущее поведение - сервер возвращает ошибку 500, хотя в будущем можно улучшить до 400
+    # Current behavior - server returns 500 error, though in future it could be improved to 400
     assert response.status_code == 500
     data = response.json()
     assert "detail" in data
@@ -43,7 +43,7 @@ def test_corrupt_image(client: TestClient) -> None:
     response = client.post(
         "/predict", files={"file": ("corrupt.jpg", corrupt_file, "image/jpeg")}
     )
-    # Текущее поведение - сервер возвращает ошибку 500, хотя в будущем можно улучшить до 400
+    # Current behavior - server returns 500 error, though in future it could be improved to 400
     assert response.status_code == 500
     data = response.json()
     assert "detail" in data
@@ -51,18 +51,18 @@ def test_corrupt_image(client: TestClient) -> None:
 
 def test_very_large_image(client: TestClient) -> None:
     """Test API response when a very large image is provided."""
-    # Создаем большое изображение
+    # Create a large image
     large_img = Image.new("RGB", (5000, 5000), color="white")
     img_byte_arr = io.BytesIO()
     large_img.save(img_byte_arr, format="JPEG")
     img_byte_arr.seek(0)
     
-    # API должно обработать большой файл или вернуть понятную ошибку
+    # API should handle large file or return clear error
     response = client.post(
         "/predict", files={"file": ("large.jpg", img_byte_arr, "image/jpeg")}
     )
     
-    # Текущее поведение - сервер возвращает ошибку 500 или успешно обрабатывает
+    # Current behavior - server returns 500 error or processes successfully
     assert response.status_code in [200, 500]
     if response.status_code != 200:
         data = response.json()
@@ -71,14 +71,14 @@ def test_very_large_image(client: TestClient) -> None:
 
 def test_model_load_error(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
     """Test error handling when model loading fails."""
-    # Патчим функцию create_model, чтобы она выбрасывала исключение
+    # Patch the create_model function to throw an exception
     def mock_create_model_error() -> None:
-        raise RuntimeError("Мок ошибки загрузки модели")
+        raise RuntimeError("Mock model loading error")
     
-    # Применяем патч только в контексте этого теста
+    # Apply patch only in the context of this test
     with mock.patch("pneumonia_classifier.models.resnet.create_model", 
                     side_effect=mock_create_model_error):
-        # API должно правильно обрабатывать ошибку модели
+        # API should properly handle model error
         img = Image.new("RGB", (224, 224), color="white")
         img_byte_arr = io.BytesIO()
         img.save(img_byte_arr, format="JPEG")
@@ -88,7 +88,7 @@ def test_model_load_error(client: TestClient, monkeypatch: pytest.MonkeyPatch) -
             "/predict", files={"file": ("test.jpg", img_byte_arr, "image/jpeg")}
         )
         
-        # Ожидаем ошибку сервера, так как модель не может быть загружена
+        # Expect server error since model cannot be loaded
         assert response.status_code in [500, 503]
         data = response.json()
         assert "detail" in data
@@ -101,7 +101,7 @@ def test_wrong_file_field_name(client: TestClient) -> None:
     img.save(img_byte_arr, format="JPEG")
     img_byte_arr.seek(0)
     
-    # Используем неправильное имя поля (не "file")
+    # Use incorrect field name (not "file")
     response = client.post(
         "/predict", files={"wrong_field": ("test.jpg", img_byte_arr, "image/jpeg")}
     )
