@@ -173,7 +173,7 @@ def deploy_to_azure(
     # Get deployment details
     container_details = aci_client.container_groups.get(resource_group, container_name)
     
-    # Проверка, что ip_address и его атрибуты не None
+    # Check that ip_address and its attributes are not None
     ip_address_obj = container_details.ip_address
     fqdn = ip_address_obj.fqdn if ip_address_obj else "unknown"
     ip_address = ip_address_obj.ip if ip_address_obj else "unknown"

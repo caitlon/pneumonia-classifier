@@ -26,15 +26,15 @@ def client() -> TestClient:
 @pytest.fixture
 def mock_model(monkeypatch: pytest.MonkeyPatch) -> Any:
     """Mock model for testing."""
-    # Create model - явно указываем использование CPU
-    torch.set_default_tensor_type('torch.FloatTensor')  # Используем CPU тензоры
+    # Create model - explicitly specifying CPU usage
+    torch.set_default_tensor_type('torch.FloatTensor')  # Using CPU tensors
     test_model = create_model()
     test_model = test_model.to("cpu")
 
     # Mock predictions to return higher probability for Pneumonia (class 1)
     def mock_forward(*args: Any, **kwargs: Any) -> torch.Tensor:
         # Return artificial logits (prediction for class 1 - Pneumonia with high probability)
-        return torch.tensor([[1.0, 5.0]])  # Значительно выше для Pneumonia
+        return torch.tensor([[1.0, 5.0]])  # Significantly higher for Pneumonia
 
     # Replace forward method
     test_model.forward = mock_forward

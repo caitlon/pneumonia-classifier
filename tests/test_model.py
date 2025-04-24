@@ -42,7 +42,7 @@ def test_save_and_load_model(tmp_path: Path) -> None:
     # Check that the file exists
     assert model_path.exists()
 
-    # Load model - явно указываем устройство CPU
+    # Load model - explicitly specifying CPU device
     loaded_model = load_model(str(model_path), device="cpu")
 
     # Check model type
@@ -66,7 +66,7 @@ def test_predict() -> None:
     # Create test input
     test_input = torch.randn(1, 3, 224, 224)
 
-    # Perform prediction - явно указываем устройство CPU
+    # Perform prediction - explicitly specifying CPU device
     result = predict(test_input, model=model, device="cpu")
 
     # Check result structure
