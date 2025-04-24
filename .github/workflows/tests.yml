@@ -28,10 +28,47 @@ jobs:
       run: |
         curl -sSL https://install.python-poetry.org | python3 -
         
+    - name: Create CUDA blocking script
+      run: |
+        # Create a conftest.py to completely mock torch.cuda
+        cat > tests/conftest.py << 'EOL'
+        import os
+        import sys
+        from unittest.mock import MagicMock
+
+        # Force environment variables
+        os.environ["CUDA_VISIBLE_DEVICES"] = ""
+        os.environ["FORCE_CUDA"] = "0"
+        os.environ["USE_CUDA"] = "0"
+
+        # Mock torch.cuda module before it's imported
+        sys.modules["torch.cuda"] = MagicMock()
+        sys.modules["torch.cuda"].is_available = lambda: False
+        sys.modules["torch.cuda"].__version__ = "0.0.0"
+
+        # Add hook for when torch is imported
+        old_import = __import__
+
+        def import_hook(name, *args, **kwargs):
+            module = old_import(name, *args, **kwargs)
+            if name == "torch":
+                if hasattr(module, "cuda"):
+                    module.cuda.is_available = lambda: False
+                    module.cuda.device_count = lambda: 0
+            return module
+
+        __builtins__["__import__"] = import_hook
+        EOL
+        
     - name: Install dependencies
       run: |
         # Install minimal dependencies for linting and type checking
         poetry config virtualenvs.create false
+        # Install CPU-only version of PyTorch explicitly
+        pip install torch==2.0.1+cpu torchvision==0.15.2+cpu --index-url https://download.pytorch.org/whl/cpu
+        # Verify PyTorch is CPU-only
+        python -c "import torch; print('CUDA available:', torch.cuda.is_available())"
+        # Install remaining dependencies
         poetry install
         
     - name: Lint with flake8
@@ -42,7 +79,8 @@ jobs:
     - name: Type check with mypy
       run: |
         poetry run mypy pneumonia_classifier scripts tests
-        
-    # Note: Disabled pytest because of CUDA library issues
-    # Tests should be run locally since the CI environment 
-    # has issues with PyTorch's CUDA dependencies even when using CPU-only version 
+      
+    - name: Test with pytest
+      run: |
+        # Run with -v for verbose output
+        poetry run pytest tests -v 
