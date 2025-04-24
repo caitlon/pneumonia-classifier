@@ -1,18 +1,18 @@
 """Tests for the pneumonia classification model."""
 
-from pathlib import Path
+# Set environment variables to disable CUDA before importing anything
 import os
+os.environ['CUDA_VISIBLE_DEVICES'] = ''
+os.environ['FORCE_CUDA'] = '0'
+os.environ['USE_CUDA'] = '0'
+
+from pathlib import Path
 
 import torch
 import torch.nn as nn
 
 from pneumonia_classifier.models.resnet import create_model, load_model, predict
 from pneumonia_classifier.utils import save_model
-
-# Set environment variables to disable CUDA before importing torch
-os.environ['CUDA_VISIBLE_DEVICES'] = ''
-os.environ['FORCE_CUDA'] = '0'
-os.environ['USE_CUDA'] = '0'
 
 def test_create_model() -> None:
     """Test model creation."""

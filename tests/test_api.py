@@ -1,7 +1,12 @@
 """Tests for the pneumonia classification API."""
 
-import io
+# Set environment variables to disable CUDA before importing anything
 import os
+os.environ['CUDA_VISIBLE_DEVICES'] = ''
+os.environ['FORCE_CUDA'] = '0'
+os.environ['USE_CUDA'] = '0'
+
+import io
 from typing import Any
 
 import pytest
@@ -11,11 +16,6 @@ from PIL import Image
 
 from pneumonia_classifier.api.main import app
 from pneumonia_classifier.models.resnet import create_model
-
-# Set environment variables to disable CUDA before importing torch
-os.environ['CUDA_VISIBLE_DEVICES'] = ''
-os.environ['FORCE_CUDA'] = '0'
-os.environ['USE_CUDA'] = '0'
 
 @pytest.fixture
 def client() -> TestClient:
