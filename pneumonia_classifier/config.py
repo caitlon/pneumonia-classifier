@@ -2,7 +2,8 @@
 
 import os
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 import yaml
 
 # Base directory of the project
@@ -27,8 +28,8 @@ API_WORKERS = 1
 
 # Model configuration
 INPUT_SIZE = 224  # Size of the input images after resizing
-BATCH_SIZE = 32   # Batch size for training and evaluation
-NUM_WORKERS = 4   # Number of workers for data loading
+BATCH_SIZE = 32  # Batch size for training and evaluation
+NUM_WORKERS = 4  # Number of workers for data loading
 
 # Class names
 CLASSES = ["NORMAL", "PNEUMONIA"]
@@ -45,28 +46,30 @@ TRAIN_CONFIG = {
     "early_stopping_patience": 5,
 }
 
+
 def load_config(config_path: Optional[str] = None) -> Dict[str, Any]:
     """Load configuration from a YAML file.
-    
+
     Args:
         config_path: Path to the YAML configuration file.
                     If None, default hyperparameters are used.
-    
+
     Returns:
         Dictionary with configuration parameters
     """
     if config_path is None:
         return TRAIN_CONFIG.copy()
-    
+
     # Load configuration from file
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
-    
+
     # Override default parameters with values from file
     result = TRAIN_CONFIG.copy()
     result.update(config)
-    
+
     return result
+
 
 # Model settings
 MODEL_CONFIG: Dict[str, Any] = {
@@ -105,4 +108,4 @@ MLFLOW_CONFIG: Dict[str, Any] = {
     "artifacts_dir": os.path.join(MLFLOW_TRACKING_URI, "artifacts"),
     "registry_uri": f"sqlite:///{os.path.join(MLFLOW_TRACKING_URI, 'mlflow.db')}",
     "ui_port": 5000,
-} 
+}
