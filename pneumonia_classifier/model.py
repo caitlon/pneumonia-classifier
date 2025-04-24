@@ -1,6 +1,6 @@
 """Model definition for pneumonia classification."""
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, cast
 
 import torch
 import torch.nn as nn
@@ -22,7 +22,8 @@ def create_model() -> nn.Module:
         param.requires_grad = False
 
     # Replace the last layer with a new one with 2 outputs (Normal/Pneumonia)
-    num_features = model.fc.in_features
+    fc_layer = cast(nn.Linear, model.fc)
+    num_features = fc_layer.in_features
     model.fc = nn.Linear(num_features, 2)
 
     # Unfreeze the last few layers for fine-tuning
@@ -30,7 +31,7 @@ def create_model() -> nn.Module:
         if "layer4" in name or "fc" in name:
             param.requires_grad = True
 
-    return model
+    return cast(nn.Module, model)
 
 
 def save_model(model_state: Dict[str, Any], save_path: str = "model.pth") -> None:
@@ -60,7 +61,8 @@ def load_model(model_path: str, device: Optional[torch.device] = None) -> nn.Mod
 
     # Create model with correct architecture
     model = models.resnet18(pretrained=False)
-    num_features = model.fc.in_features
+    fc_layer = cast(nn.Linear, model.fc)
+    num_features = fc_layer.in_features
     model.fc = nn.Linear(num_features, 2)
 
     # Load weights from file
@@ -68,4 +70,4 @@ def load_model(model_path: str, device: Optional[torch.device] = None) -> nn.Mod
     model = model.to(device)
     model.eval()
 
-    return model
+    return cast(nn.Module, model)

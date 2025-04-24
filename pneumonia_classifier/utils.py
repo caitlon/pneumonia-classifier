@@ -4,7 +4,7 @@ Utility functions for pneumonia classification model.
 import json
 import logging
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -45,7 +45,8 @@ def process_image(image: Image.Image) -> torch.Tensor:
     img_tensor = transform(image)
 
     # Add batch dimension
-    return img_tensor.unsqueeze(0)
+    result: torch.Tensor = img_tensor.unsqueeze(0)
+    return result
 
 
 def save_config(config: Dict[str, Any], filepath: str) -> None:
@@ -72,7 +73,7 @@ def load_config(filepath: str) -> Dict[str, Any]:
         Configuration dictionary
     """
     with open(filepath, "r") as f:
-        config = json.load(f)
+        config: Dict[str, Any] = json.load(f)
     logger.info(f"Config loaded from {filepath}")
     return config
 
@@ -133,7 +134,8 @@ def plot_confusion_matrix(
     """
     cm = confusion_matrix(y_true, y_pred)
     plt.figure(figsize=(10, 8))
-    plt.imshow(cm, interpolation="nearest", cmap=plt.cm.Blues)
+    cmap = plt.get_cmap('Blues')
+    plt.imshow(cm, interpolation="nearest", cmap=cmap)
     plt.title("Confusion Matrix")
     plt.colorbar()
 
@@ -169,7 +171,7 @@ def get_classification_report(
     y_pred: List[int],
     class_names: List[str],
     save_path: Optional[str] = None,
-) -> Dict[str, Any]:
+) -> Dict[str, Dict[str, Any]]:
     """
     Generate and save classification report.
 
@@ -182,16 +184,16 @@ def get_classification_report(
     Returns:
         Classification report as dictionary
     """
-    report = classification_report(
+    report_dict: Dict[str, Dict[str, Any]] = classification_report(
         y_true, y_pred, target_names=class_names, output_dict=True
     )
 
     if save_path:
         with open(save_path, "w") as f:
-            json.dump(report, f, indent=4)
+            json.dump(report_dict, f, indent=4)
         logger.info(f"Classification report saved to {save_path}")
 
-    return report
+    return report_dict
 
 
 def set_device() -> torch.device:

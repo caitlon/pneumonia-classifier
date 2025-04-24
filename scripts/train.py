@@ -27,7 +27,7 @@ from pneumonia_classifier.utils import format_metrics, get_device, save_model
 class MLflowLogger:
     """Class for capturing stdout and logging to MLflow."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the logger."""
         self.log_buffer: List[str] = []
         self.original_stdout = sys.stdout

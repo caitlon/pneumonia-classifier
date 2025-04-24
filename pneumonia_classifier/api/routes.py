@@ -50,7 +50,7 @@ async def predict_pneumonia(file: UploadFile = File(...)) -> Dict[str, Any]:
         image = Image.open(io.BytesIO(contents))
 
         # Process image and get prediction
-        result = predict(image, model=api_main.model)
+        result: Dict[str, Any] = predict(image, model=api_main.model)
         
         # Add file metadata with безопасным приведением типов
         result["filename"] = "" if file.filename is None else file.filename

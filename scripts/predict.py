@@ -2,6 +2,7 @@
 
 import argparse
 import os
+from typing import Dict, Optional, Any
 
 from PIL import Image
 
@@ -11,13 +12,16 @@ from pneumonia_classifier.models.resnet import load_model, predict
 from pneumonia_classifier.utils import get_device
 
 
-def predict_image_file(image_path: str, model_path: str):
+def predict_image_file(image_path: str, model_path: str) -> Optional[Dict[str, Any]]:
     """
     Makes a prediction based on an image file.
 
     Args:
         image_path: Path to the image
         model_path: Path to the model
+        
+    Returns:
+        Dictionary with prediction results or None if error occurred
     """
     try:
         # Load the image
@@ -31,7 +35,7 @@ def predict_image_file(image_path: str, model_path: str):
         image_tensor = process_image(image).to(device)
 
         # Get prediction
-        result = predict(model, image_tensor)
+        result = predict(image_tensor, model=model)
 
         # Display the result
         print(f"\nFile: {image_path}")
@@ -47,7 +51,7 @@ def predict_image_file(image_path: str, model_path: str):
         return None
 
 
-def main():
+def main() -> None:
     """Main function for prediction."""
     parser = argparse.ArgumentParser(
         description="Pneumonia prediction from X-ray image"

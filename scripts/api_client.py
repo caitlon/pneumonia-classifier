@@ -4,11 +4,12 @@
 import argparse
 import sys
 from pathlib import Path
+from typing import Dict, Optional, Any
 
 import requests
 
 
-def predict_with_api(image_path: str, api_url: str) -> dict:
+def predict_with_api(image_path: str, api_url: str) -> Optional[Dict[str, Any]]:
     """
     Send an image to the API for prediction.
 
@@ -17,7 +18,7 @@ def predict_with_api(image_path: str, api_url: str) -> dict:
         api_url: URL of the API endpoint
 
     Returns:
-        API response as a dictionary
+        API response as a dictionary or None if error occurred
     """
     # Ensure the API URL has the correct endpoint
     if not api_url.endswith("/predict"):
@@ -34,7 +35,7 @@ def predict_with_api(image_path: str, api_url: str) -> dict:
 
         # Check if the request was successful
         if response.status_code == 200:
-            result = response.json()
+            result: Dict[str, Any] = response.json()
             print("\nPrediction Results:")
             print(f"Diagnosis: {result['predicted_class']}")
             print(f"Confidence: {result['confidence']}%")
@@ -49,17 +50,17 @@ def predict_with_api(image_path: str, api_url: str) -> dict:
     except requests.exceptions.ConnectionError as e:
         print(f"Connection error: {e}")
         print("Please check that the API server is running and accessible.")
-        sys.exit(1)
+        return None
     except requests.exceptions.Timeout as e:
         print(f"Connection timeout: {e}")
         print("The server is taking too long to respond.")
-        sys.exit(1)
+        return None
     except Exception as e:
         print(f"Unexpected error: {e}")
-        sys.exit(1)
+        return None
 
 
-def main():
+def main() -> None:
     """Main function."""
     parser = argparse.ArgumentParser(
         description="Client for pneumonia classification API"
@@ -77,7 +78,9 @@ def main():
         return
 
     # Make the prediction
-    predict_with_api(args.image_path, args.api_url)
+    result = predict_with_api(args.image_path, args.api_url)
+    if result is None:
+        sys.exit(1)
 
 
 if __name__ == "__main__":
