@@ -103,7 +103,7 @@ def train_model(
     dataloaders: Dict[str, Any],
     num_epochs: int = 10,
     learning_rate: float = 0.001,
-    run_name: str = None,
+    run_name: Optional[str] = None,
     early_stopping_patience: int = 5,
 ) -> Dict[str, Any]:
     """
@@ -130,7 +130,7 @@ def train_model(
     )
 
     best_val_loss = float("inf")
-    results = {"train_losses": [], "val_losses": [], "val_metrics": []}
+    results: Dict[str, Any] = {"train_losses": [], "val_losses": [], "val_metrics": []}
 
     # Early stopping variables
     patience_counter = 0
@@ -314,7 +314,7 @@ def train_model(
     return results
 
 
-def main():
+def main() -> None:
     """Main function for training and saving the model."""
     parser = argparse.ArgumentParser(
         description="Training a pneumonia classification model"

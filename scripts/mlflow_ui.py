@@ -8,7 +8,7 @@ import mlflow
 from pneumonia_classifier.config import MLFLOW_CONFIG
 
 
-def main():
+def main() -> None:
     """Starts MLflow UI for experiment visualization."""
     parser = argparse.ArgumentParser(description="Run MLflow UI")
     parser.add_argument(

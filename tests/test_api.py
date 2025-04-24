@@ -1,6 +1,7 @@
 """Tests for the pneumonia classification API."""
 
 import io
+from typing import Any, Dict
 
 import pytest
 import torch
@@ -12,19 +13,19 @@ from pneumonia_classifier.models.resnet import create_model
 
 
 @pytest.fixture
-def client():
+def client() -> TestClient:
     """Test client for the API."""
     return TestClient(app)
 
 
 @pytest.fixture
-def mock_model(monkeypatch):
+def mock_model(monkeypatch: pytest.MonkeyPatch) -> Any:
     """Mock model for testing."""
     # Create model
     test_model = create_model()
 
     # Mock predictions to return higher probability for Pneumonia (class 1)
-    def mock_forward(*args, **kwargs):
+    def mock_forward(*args: Any, **kwargs: Any) -> torch.Tensor:
         # Return artificial logits (prediction for class 1 - Pneumonia with high probability)
         return torch.tensor([[1.0, 5.0]])  # Значительно выше для Pneumonia
 
@@ -37,7 +38,7 @@ def mock_model(monkeypatch):
     return test_model
 
 
-def test_root_endpoint(client):
+def test_root_endpoint(client: TestClient) -> None:
     """Test root endpoint."""
     response = client.get("/")
     assert response.status_code == 200
@@ -46,14 +47,14 @@ def test_root_endpoint(client):
     assert "usage" in data
 
 
-def test_health_endpoint(client, mock_model):
+def test_health_endpoint(client: TestClient, mock_model: Any) -> None:
     """Test health check endpoint."""
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json() == {"status": "healthy"}
 
 
-def test_predict_endpoint(client, mock_model):
+def test_predict_endpoint(client: TestClient, mock_model: Any) -> None:
     """Test prediction endpoint."""
     # Create artificial image
     img = Image.new("RGB", (100, 100), color="white")
@@ -85,7 +86,7 @@ def test_predict_endpoint(client, mock_model):
     assert data["content_type"] == "image/jpeg"
 
 
-def test_predict_wrong_file_type(client, mock_model):
+def test_predict_wrong_file_type(client: TestClient, mock_model: Any) -> None:
     """Test handling of incorrect file type."""
     # Create text file
     text_file = io.BytesIO(b"This is not an image")

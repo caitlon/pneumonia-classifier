@@ -1,5 +1,7 @@
 """Tests for the pneumonia classification model."""
 
+from typing import Dict, Union
+
 import torch
 import torch.nn as nn
 
@@ -7,7 +9,7 @@ from pneumonia_classifier.models.resnet import create_model, load_model, predict
 from pneumonia_classifier.utils import save_model
 
 
-def test_create_model():
+def test_create_model() -> None:
     """Test model creation."""
     model = create_model()
 
@@ -23,7 +25,7 @@ def test_create_model():
     assert output.shape == (1, 2)
 
 
-def test_save_and_load_model(tmp_path):
+def test_save_and_load_model(tmp_path: str) -> None:
     """Test saving and loading the model."""
     # Create model
     model = create_model()
@@ -51,7 +53,7 @@ def test_save_and_load_model(tmp_path):
     assert output.shape == (1, 2)
 
 
-def test_predict():
+def test_predict() -> None:
     """Test prediction function."""
     # Create model
     model = create_model()

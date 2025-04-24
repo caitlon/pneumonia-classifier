@@ -1,6 +1,7 @@
 """FastAPI application for pneumonia classification."""
 
 import os
+from typing import Dict, Optional
 
 import torch.nn as nn
 from fastapi import FastAPI
@@ -12,7 +13,7 @@ from pneumonia_classifier.models.resnet import load_model
 from pneumonia_classifier.utils import get_device
 
 # Global variable for storing the model
-model: nn.Module = None
+model: Optional[nn.Module] = None
 
 # Initialize FastAPI application
 app = FastAPI(
@@ -35,7 +36,7 @@ app.include_router(router)
 
 
 @app.on_event("startup")
-async def startup_event():
+async def startup_event() -> None:
     """Loads the model when the application starts."""
     global model
     model_path = os.environ.get("MODEL_PATH", TRAINING_CONFIG["default_model_path"])
@@ -49,7 +50,7 @@ async def startup_event():
 
 
 @app.get("/")
-async def root():
+async def root() -> Dict[str, str]:
     """Root endpoint with API information."""
     return {
         "message": "API for pneumonia classification using X-ray images",

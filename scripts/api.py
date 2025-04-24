@@ -8,7 +8,7 @@ import uvicorn
 from pneumonia_classifier.config import API_CONFIG
 
 
-def main():
+def main() -> None:
     """Starts the API server."""
     parser = argparse.ArgumentParser(description="Run API for pneumonia classification")
     parser.add_argument(

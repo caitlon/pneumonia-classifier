@@ -2,7 +2,7 @@
 
 import argparse
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, cast
 
 from azure.identity import ClientSecretCredential, DefaultAzureCredential
 from azure.mgmt.containerinstance import ContainerInstanceManagementClient
@@ -46,7 +46,9 @@ def get_credentials(
     if all([client_id, client_secret, tenant_id]):
         logger.info("Using service principal authentication")
         return ClientSecretCredential(
-            tenant_id=tenant_id, client_id=client_id, client_secret=client_secret
+            tenant_id=cast(str, tenant_id),
+            client_id=cast(str, client_id),
+            client_secret=cast(str, client_secret),
         )
     else:
         logger.info("Using default Azure authentication")
@@ -170,8 +172,11 @@ def deploy_to_azure(
 
     # Get deployment details
     container_details = aci_client.container_groups.get(resource_group, container_name)
-    fqdn = container_details.ip_address.fqdn
-    ip_address = container_details.ip_address.ip
+    
+    # Проверка, что ip_address и его атрибуты не None
+    ip_address_obj = container_details.ip_address
+    fqdn = ip_address_obj.fqdn if ip_address_obj else "unknown"
+    ip_address = ip_address_obj.ip if ip_address_obj else "unknown"
 
     logger.info(f"Deployment completed: {container_name}")
     logger.info(f"FQDN: {fqdn}")

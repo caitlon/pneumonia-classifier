@@ -3,7 +3,7 @@
 import argparse
 import logging
 import subprocess
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 from azure.identity import ClientSecretCredential, DefaultAzureCredential
 from azure.mgmt.containerregistry import ContainerRegistryManagementClient
@@ -64,7 +64,9 @@ def get_azure_credentials(
     if all([client_id, client_secret, tenant_id]):
         logger.info("Using service principal authentication")
         return ClientSecretCredential(
-            tenant_id=tenant_id, client_id=client_id, client_secret=client_secret
+            tenant_id=cast(str, tenant_id),
+            client_id=cast(str, client_id),
+            client_secret=cast(str, client_secret),
         )
     else:
         logger.info("Using default Azure authentication")

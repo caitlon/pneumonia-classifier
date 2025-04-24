@@ -1,7 +1,7 @@
 """API routes for pneumonia classification."""
 
 import io
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from PIL import Image
@@ -41,7 +41,7 @@ async def predict_pneumonia(file: UploadFile = File(...)) -> Dict[str, Any]:
         raise HTTPException(status_code=500, detail="Model not loaded")
 
     # Check if the file is an image
-    if not file.content_type.startswith("image/"):
+    if file.content_type is None or not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="File must be an image")
 
     try:
