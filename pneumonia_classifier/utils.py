@@ -231,6 +231,11 @@ def get_device() -> torch.device:
     Returns:
         device: Computing device
     """
+    # Проверяем переменную окружения - если она установлена, используем CPU
+    if os.environ.get("CUDA_VISIBLE_DEVICES") == "":
+        return torch.device("cpu")
+        
+    # Обычная проверка доступности CUDA
     if torch.cuda.is_available():
         return torch.device("cuda")
     # Temporarily disabling MPS to avoid errors on Mac

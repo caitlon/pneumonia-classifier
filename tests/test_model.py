@@ -1,6 +1,9 @@
 """Tests for the pneumonia classification model."""
 
 from pathlib import Path
+import os
+
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 import torch
 import torch.nn as nn
@@ -17,7 +20,6 @@ def test_create_model() -> None:
     assert isinstance(model, nn.Module)
 
     # Check that the last layer has 2 outputs
-    # Мы уверены, что model это ResNet, потому что create_model создаёт именно ResNet
     assert model.fc.out_features == 2  # type: ignore
 
     # Check that the model handles input shape correctly
@@ -38,14 +40,13 @@ def test_save_and_load_model(tmp_path: Path) -> None:
     # Check that the file exists
     assert model_path.exists()
 
-    # Load model
-    loaded_model = load_model(str(model_path))
+    # Load model - явно указываем устройство CPU
+    loaded_model = load_model(str(model_path), device="cpu")
 
     # Check model type
     assert isinstance(loaded_model, nn.Module)
 
     # Check that the last layer has 2 outputs
-    # Мы уверены, что loaded_model это ResNet
     assert loaded_model.fc.out_features == 2  # type: ignore
 
     # Check output shape
@@ -63,8 +64,8 @@ def test_predict() -> None:
     # Create test input
     test_input = torch.randn(1, 3, 224, 224)
 
-    # Perform prediction
-    result = predict(test_input, model=model)
+    # Perform prediction - явно указываем устройство CPU
+    result = predict(test_input, model=model, device="cpu")
 
     # Check result structure
     assert "class_name" in result

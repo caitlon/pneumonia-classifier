@@ -1,7 +1,10 @@
 """Tests for the pneumonia classification API."""
 
 import io
+import os
 from typing import Any
+
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 import pytest
 import torch
@@ -21,8 +24,10 @@ def client() -> TestClient:
 @pytest.fixture
 def mock_model(monkeypatch: pytest.MonkeyPatch) -> Any:
     """Mock model for testing."""
-    # Create model
+    # Create model - явно указываем использование CPU
+    torch.set_default_tensor_type('torch.FloatTensor')  # Используем CPU тензоры
     test_model = create_model()
+    test_model = test_model.to("cpu")
 
     # Mock predictions to return higher probability for Pneumonia (class 1)
     def mock_forward(*args: Any, **kwargs: Any) -> torch.Tensor:
@@ -34,6 +39,8 @@ def mock_model(monkeypatch: pytest.MonkeyPatch) -> Any:
 
     # Replace global model
     monkeypatch.setattr("pneumonia_classifier.api.main.model", test_model)
+    
+    monkeypatch.setattr("pneumonia_classifier.utils.get_device", lambda: torch.device("cpu"))
 
     return test_model
 

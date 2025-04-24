@@ -1,6 +1,9 @@
 """FastAPI application for pneumonia classification."""
 
 import os
+if "PYTEST_CURRENT_TEST" in os.environ or "CI" in os.environ:
+    os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
 from typing import Dict, Optional
 
 import torch.nn as nn
