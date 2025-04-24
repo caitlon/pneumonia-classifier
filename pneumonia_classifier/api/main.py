@@ -9,6 +9,8 @@ from pneumonia_classifier.config import API_CONFIG, TRAINING_CONFIG
 from pneumonia_classifier.models.resnet import load_model
 from pneumonia_classifier.utils import get_device
 
+from pneumonia_classifier.api.routes import router  # moved import to top for lint
+
 # Global variable for storing the model
 model: nn.Module = None
 
@@ -28,9 +30,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Now import routes after defining model and app
-from pneumonia_classifier.api.routes import router
-
 # Connect routes
 app.include_router(router)
 
@@ -38,7 +37,9 @@ app.include_router(router)
 async def startup_event():
     """Loads the model when the application starts."""
     global model
-    model_path = os.environ.get("MODEL_PATH", TRAINING_CONFIG["default_model_path"])
+    model_path = os.environ.get(
+        "MODEL_PATH", TRAINING_CONFIG["default_model_path"]
+    )
     
     try:
         device = get_device()
@@ -52,5 +53,7 @@ async def root():
     """Root endpoint with API information."""
     return {
         "message": "API for pneumonia classification using X-ray images",
-        "usage": "Send a POST request with an image to /predict"
+        "usage": (
+            "Send a POST request with an image to /predict"
+        ),
     } 
