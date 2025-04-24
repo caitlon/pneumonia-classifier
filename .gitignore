@@ -42,7 +42,8 @@ venv.bak/
 
 # Project specific
 model.pth
-data/
+/data/
+!pneumonia_classifier/data/
 *.log
 
 # Docker
@@ -71,7 +72,8 @@ old/
 mlruns/
 
 # Saved model artifacts
-models/
+/models/
+!pneumonia_classifier/models/
 
 # macOS metadata
 .DS_Store
