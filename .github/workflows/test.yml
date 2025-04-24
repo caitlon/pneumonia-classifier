@@ -44,9 +44,9 @@ jobs:
     
     - name: Test
       run: |
-        poetry run pytest tests/ --cov=pneumonia_classifier
+        poetry run pytest tests/
     
     - name: Format check
       run: |
         poetry run black --check pneumonia_classifier scripts tests
-        poetry run isort --check-only pneumonia_classifier scripts tests 
+        poetry run isort --check-only pneumonia_classifier scripts tests
