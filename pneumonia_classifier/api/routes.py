@@ -1,7 +1,7 @@
 """API routes for pneumonia classification."""
 
 import io
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union, cast
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from PIL import Image
@@ -52,9 +52,9 @@ async def predict_pneumonia(file: UploadFile = File(...)) -> Dict[str, Any]:
         # Process image and get prediction
         result = predict(image, model=api_main.model)
         
-        # Add file metadata
-        result["filename"] = file.filename
-        result["content_type"] = file.content_type
+        # Add file metadata with безопасным приведением типов
+        result["filename"] = "" if file.filename is None else file.filename
+        result["content_type"] = "" if file.content_type is None else file.content_type
         
         return result
         

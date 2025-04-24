@@ -1,9 +1,11 @@
 """Tests for the pneumonia classification model."""
 
-from typing import Dict, Union
+from pathlib import Path
+from typing import Any, cast
 
 import torch
 import torch.nn as nn
+from torchvision.models import ResNet
 
 from pneumonia_classifier.models.resnet import create_model, load_model, predict
 from pneumonia_classifier.utils import save_model
@@ -17,7 +19,8 @@ def test_create_model() -> None:
     assert isinstance(model, nn.Module)
 
     # Check that the last layer has 2 outputs
-    assert model.fc.out_features == 2
+    # Мы уверены, что model это ResNet, потому что create_model создаёт именно ResNet
+    assert model.fc.out_features == 2  # type: ignore
 
     # Check that the model handles input shape correctly
     test_input = torch.randn(1, 3, 224, 224)
@@ -25,26 +28,27 @@ def test_create_model() -> None:
     assert output.shape == (1, 2)
 
 
-def test_save_and_load_model(tmp_path: str) -> None:
+def test_save_and_load_model(tmp_path: Path) -> None:
     """Test saving and loading the model."""
     # Create model
     model = create_model()
 
     # Save model
     model_path = tmp_path / "test_model.pth"
-    save_model(model.state_dict(), model_path)
+    save_model(model.state_dict(), str(model_path))
 
     # Check that the file exists
     assert model_path.exists()
 
     # Load model
-    loaded_model = load_model(model_path)
+    loaded_model = load_model(str(model_path))
 
     # Check model type
     assert isinstance(loaded_model, nn.Module)
 
     # Check that the last layer has 2 outputs
-    assert loaded_model.fc.out_features == 2
+    # Мы уверены, что loaded_model это ResNet
+    assert loaded_model.fc.out_features == 2  # type: ignore
 
     # Check output shape
     test_input = torch.randn(1, 3, 224, 224)

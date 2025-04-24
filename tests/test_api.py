@@ -1,7 +1,7 @@
 """Tests for the pneumonia classification API."""
 
 import io
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 import torch
