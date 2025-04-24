@@ -36,15 +36,21 @@ def predict_image_file(image_path: str, model_path: str) -> Optional[Dict[str, A
 
         # Get prediction
         result = predict(image_tensor, model=model)
+        
+        prediction_result: Dict[str, Any] = {
+            "class_name": result["class_name"],
+            "class_id": result["class_id"],
+            "probability": result["probability"]
+        }
 
         # Display the result
         print(f"\nFile: {image_path}")
-        print(f"Diagnosis: {result['class_name']}")
+        print(f"Diagnosis: {prediction_result['class_name']}")
         print(
-            f"Confidence: {result['probability']:.4f} ({result['probability']*100:.2f}%)"
+            f"Confidence: {prediction_result['probability']:.4f} ({prediction_result['probability']*100:.2f}%)"
         )
 
-        return result
+        return prediction_result
 
     except Exception as e:
         print(f"Error processing image {image_path}: {str(e)}")
