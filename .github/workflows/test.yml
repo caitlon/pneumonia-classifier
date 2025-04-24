@@ -1,10 +1,11 @@
-name: Test
+# This workflow file is deprecated and has been replaced by tests.yml
+# It is kept here for reference only and can only be triggered manually
+
+name: Test (DEPRECATED)
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  # Manual trigger only
+  workflow_dispatch:
 
 jobs:
   test:
