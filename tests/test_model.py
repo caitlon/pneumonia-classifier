@@ -1,11 +1,9 @@
 """Tests for the pneumonia classification model."""
 
 from pathlib import Path
-from typing import Any, cast
 
 import torch
 import torch.nn as nn
-from torchvision.models import ResNet
 
 from pneumonia_classifier.models.resnet import create_model, load_model, predict
 from pneumonia_classifier.utils import save_model

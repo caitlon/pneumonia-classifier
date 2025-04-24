@@ -1,7 +1,7 @@
 """API routes for pneumonia classification."""
 
 import io
-from typing import Any, Dict, Optional, Union, cast
+from typing import Any, Dict
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from PIL import Image
