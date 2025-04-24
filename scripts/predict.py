@@ -77,8 +77,8 @@ def main() -> None:
         print(f"Error: Model file {args.model_path} does not exist")
         return
 
-    # Make prediction
-    predict_image_file(args.image_path, args.model_path)
+    # Make prediction - явно игнорируем возвращаемое значение, т.к. оно уже выводится в консоль
+    _ = predict_image_file(args.image_path, args.model_path)
 
 
 if __name__ == "__main__":
