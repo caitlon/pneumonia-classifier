@@ -65,4 +65,16 @@ htmlcov/
 .pre-commit-config.yaml
 
 # old directory
-old/ 
+old/
+
+# MLflow tracking artifacts
+mlruns/
+
+# Saved model artifacts
+models/
+
+# macOS metadata
+.DS_Store
+
+# Windows metadata
+Thumbs.db 
