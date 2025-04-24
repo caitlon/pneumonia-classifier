@@ -3,14 +3,13 @@
 from pathlib import Path
 import os
 
-os.environ["CUDA_VISIBLE_DEVICES"] = ""
-
 import torch
 import torch.nn as nn
 
 from pneumonia_classifier.models.resnet import create_model, load_model, predict
 from pneumonia_classifier.utils import save_model
 
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 def test_create_model() -> None:
     """Test model creation."""

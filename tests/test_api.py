@@ -4,8 +4,6 @@ import io
 import os
 from typing import Any
 
-os.environ["CUDA_VISIBLE_DEVICES"] = ""
-
 import pytest
 import torch
 from fastapi.testclient import TestClient
@@ -14,6 +12,7 @@ from PIL import Image
 from pneumonia_classifier.api.main import app
 from pneumonia_classifier.models.resnet import create_model
 
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 @pytest.fixture
 def client() -> TestClient:
