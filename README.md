@@ -29,6 +29,7 @@ pneumonia-classifier/
 │   ├── models/                   # Models
 │   │   └── resnet.py             # ResNet model implementation
 │   ├── config.py                 # Configurations
+│   ├── model.py                  # Model definition
 │   └── utils.py                  # Utility functions
 ├── scripts/                      # Scripts
 │   ├── train.py                  # Training script
@@ -40,7 +41,9 @@ pneumonia-classifier/
 │   └── deploy_to_azure.py        # Script for deploying to Azure Container Instances
 ├── tests/                        # Tests
 │   ├── test_api.py               # API tests
-│   └── test_model.py             # Model tests
+│   ├── test_model.py             # Model tests
+│   ├── test_integration.py       # Integration tests
+│   └── test_error_handling.py    # Error handling tests
 ├── models/                       # Saved models
 │   └── model.pth                 # Trained model
 ├── mlruns/                       # MLflow experiment data
@@ -138,6 +141,7 @@ Parameters:
 - `--epochs` - number of training epochs (default: 10)
 - `--learning_rate` - learning rate (default: 0.001)
 - `--run_name` - run name for MLflow (default: auto-generated)
+- `--patience` - early stopping patience (default: 5)
 
 ### Experiment Tracking with MLflow
 
@@ -168,26 +172,7 @@ The model is evaluated using the following metrics:
 - **Recall**: recall (proportion of detected positive cases)
 - **F1-score**: harmonic mean between precision and recall
 
-Metrics are monitored on the validation set, and the best model is saved based on minimizing validation loss.
-
-#### Test Run Results
-
-Results of a CPU run (2 epochs):
-
-```
-Training set: 5216 images
-Validation set: 16 images
-Test set: 624 images
-
-Best results (epoch 1):
-- Validation loss: 0.1870
-- Accuracy: 87.50%
-- Precision: 80.00%
-- Recall: 100.00%
-- F1-score: 88.89%
-```
-
-Despite the small validation sample size and few epochs, the model shows high recall (100%), which means no missed pneumonia cases. This is particularly important in medical diagnostics, where missing a disease (false negative) is more dangerous than a false alarm.
+Metrics are monitored on the validation set, and the best model is saved based on minimizing validation loss. Early stopping is implemented to prevent overfitting.
 
 ## 🔍 Using the Trained Model
 
@@ -263,18 +248,6 @@ python scripts/build_and_push.py \
   --location "westeurope"
 ```
 
-Parameters:
-- `--subscription-id` - Your Azure subscription ID
-- `--registry-name` - Name for the Azure Container Registry (ACR)
-- `--image-name` - Name and tag for the Docker image
-- `--location` - Azure region (e.g., westeurope, eastus)
-
-This script:
-1. Creates a resource group if it doesn't exist
-2. Creates an Azure Container Registry if it doesn't exist
-3. Builds the Docker image locally
-4. Pushes the image to ACR
-
 ### Deploying to Azure Container Instances
 
 After pushing the image, deploy it to Azure Container Instances:
@@ -287,45 +260,6 @@ python scripts/deploy_to_azure.py \
   --registry-username "username" \
   --registry-password "password" \
   --location "westeurope"
-```
-
-This script:
-1. Creates a Container Instance in Azure
-2. Deploys the API container with the model
-3. Exposes port 8000 for API access
-4. Provides a public URL for accessing the API
-
-After deployment, the script will output the URL where the API is accessible, such as:
-```
-API is now available at: http://your-app-name.westeurope.azurecontainer.io:8000
-```
-
-### Testing the Deployed API
-
-You can interact with the deployed API using the `api_client.py` script:
-
-```bash
-python scripts/api_client.py \
-  --image_path data/test/PNEUMONIA/example.jpeg \
-  --api_url http://your-app-name.westeurope.azurecontainer.io:8000
-```
-
-Or using curl:
-
-```bash
-curl -X POST -F "file=@path/to/image.jpg" http://your-app-name.westeurope.azurecontainer.io:8000/predict
-```
-
-Example response:
-```json
-{
-  "predicted_class": "Pneumonia",
-  "confidence": 98.7,
-  "probabilities": {
-    "Normal": 1.3,
-    "Pneumonia": 98.7
-  }
-}
 ```
 
 ## 🐳 Docker
@@ -376,11 +310,7 @@ make format
 
 ## 💻 Optimization for Mac with Apple Silicon
 
-The project supports acceleration on Apple Silicon chips (M1/M2/M3) through the MPS backend. For optimal performance and stability on macOS:
-
-1. Set `num_workers=0` in the configuration (prevents errors with multi-threaded loading)
-2. Ensure PyTorch version 1.12+ is used
-3. If errors occur, temporarily disable MPS in utils.py and use CPU
+The project supports acceleration on Apple Silicon chips (M1/M2/M3) through the MPS backend. For optimal performance and stability on macOS.
 
 ## 🔧 Technologies
 
@@ -389,19 +319,14 @@ The project supports acceleration on Apple Silicon chips (M1/M2/M3) through the 
 - **Torchvision**: library for working with images
 - **Poetry**: dependency management
 - **Docker**: application containerization
+- **MLflow**: experiment tracking
 - **PyTest**: testing
 - **GitHub Actions**: CI/CD
 
-## 🔮 Further Improvements
-
-The project can be improved in the following ways:
+## 🔮 Future Improvements
 
 1. **Hyperparameter Search**: Add GridSearch or Optuna for automatic search of optimal parameters
 2. **Advanced Augmentations**: Increase variety of augmentations for model robustness
 3. **Other Architectures**: Compare performance with other CNN architectures (EfficientNet, DenseNet)
-4. **Model Explainability**: Add Grad-CAM or SHAP for model decision visualization
-5. **Monitoring**: Integration with W&B, MLflow or TensorBoard for experiment tracking
-
-## 📚 Additional Information
-
-The model is based on the ResNet18 architecture pre-trained on ImageNet with fine-tuning on the X-ray dataset. This allows efficient classification even with limited amount of training data. 
+4. **Model Explainability**: Add Grad-CAM for model decision visualization
+5. **Data Drift Monitoring**: Add monitoring for production model 
