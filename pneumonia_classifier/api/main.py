@@ -33,6 +33,7 @@ app.add_middleware(
 # Connect routes
 app.include_router(router)
 
+
 @app.on_event("startup")
 async def startup_event():
     """Loads the model when the application starts."""
@@ -40,13 +41,14 @@ async def startup_event():
     model_path = os.environ.get(
         "MODEL_PATH", TRAINING_CONFIG["default_model_path"]
     )
-    
+
     try:
         device = get_device()
         model = load_model(model_path, device)
         print(f"Model successfully loaded from {model_path}")
     except Exception as e:
         print(f"Error loading model: {e}")
+
 
 @app.get("/")
 async def root():
@@ -56,4 +58,4 @@ async def root():
         "usage": (
             "Send a POST request with an image to /predict"
         ),
-    } 
+    }
