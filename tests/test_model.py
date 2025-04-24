@@ -9,7 +9,10 @@ import torch.nn as nn
 from pneumonia_classifier.models.resnet import create_model, load_model, predict
 from pneumonia_classifier.utils import save_model
 
-os.environ["CUDA_VISIBLE_DEVICES"] = ""
+# Set environment variables to disable CUDA before importing torch
+os.environ['CUDA_VISIBLE_DEVICES'] = ''
+os.environ['FORCE_CUDA'] = '0'
+os.environ['USE_CUDA'] = '0'
 
 def test_create_model() -> None:
     """Test model creation."""

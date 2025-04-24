@@ -5,7 +5,6 @@ import os
 from typing import Any
 
 import pytest
-
 import torch
 from fastapi.testclient import TestClient
 from PIL import Image
@@ -13,7 +12,10 @@ from PIL import Image
 from pneumonia_classifier.api.main import app
 from pneumonia_classifier.models.resnet import create_model
 
-os.environ["CUDA_VISIBLE_DEVICES"] = ""
+# Set environment variables to disable CUDA before importing torch
+os.environ['CUDA_VISIBLE_DEVICES'] = ''
+os.environ['FORCE_CUDA'] = '0'
+os.environ['USE_CUDA'] = '0'
 
 @pytest.fixture
 def client() -> TestClient:
