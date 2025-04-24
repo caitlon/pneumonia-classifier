@@ -9,7 +9,7 @@ from pneumonia_classifier.config import API_CONFIG, TRAINING_CONFIG
 from pneumonia_classifier.models.resnet import load_model
 from pneumonia_classifier.utils import get_device
 
-from pneumonia_classifier.api.routes import router  # moved import to top for lint
+from pneumonia_classifier.api.routes import router
 
 # Global variable for storing the model
 model: nn.Module = None
