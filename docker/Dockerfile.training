@@ -1,0 +1,26 @@
+FROM python:3.9-slim
+
+WORKDIR /app
+
+# Installing dependencies for package building
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copying project files
+COPY pyproject.toml README.md ./
+COPY pneumonia_classifier ./pneumonia_classifier
+COPY scripts ./scripts
+COPY data ./data
+
+# Creating directory for models
+RUN mkdir -p models
+
+# Installing dependencies
+RUN pip install --no-cache-dir .
+
+# Setting environment variables
+ENV PYTHONPATH=/app
+
+# Command to run training
+CMD ["python", "scripts/train.py", "--data_dir", "/app/data", "--output_path", "/app/models/model.pth"] 

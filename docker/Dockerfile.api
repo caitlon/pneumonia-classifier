@@ -1,0 +1,44 @@
+FROM python:3.9-slim
+
+WORKDIR /app
+
+# Installing dependencies for package building
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy only necessary files first to improve layer caching
+COPY pyproject.toml README.md ./
+
+# Create necessary directories
+RUN mkdir -p pneumonia_classifier/api pneumonia_classifier/models
+
+# Copy module files
+COPY pneumonia_classifier/__init__.py pneumonia_classifier/
+COPY pneumonia_classifier/api/__init__.py pneumonia_classifier/api/
+COPY pneumonia_classifier/api/main.py pneumonia_classifier/api/
+COPY pneumonia_classifier/api/routes.py pneumonia_classifier/api/
+COPY pneumonia_classifier/config.py pneumonia_classifier/
+COPY pneumonia_classifier/utils.py pneumonia_classifier/
+COPY pneumonia_classifier/model.py pneumonia_classifier/
+COPY pneumonia_classifier/models/ pneumonia_classifier/models/
+
+# Copy scripts and models
+COPY scripts ./scripts
+COPY models ./models
+
+# Installing dependencies in development mode
+RUN pip install --no-cache-dir -e .
+
+# Print Python path for debugging
+RUN python -c "import sys; print(sys.path)"
+
+# Exposing port for FastAPI
+EXPOSE 8000
+
+# Setting environment variables
+ENV PYTHONPATH=/app
+ENV MODEL_PATH=/app/models/model.pth
+
+# Starting the API server directly with uvicorn
+CMD ["uvicorn", "pneumonia_classifier.api.main:app", "--host", "0.0.0.0", "--port", "8000"] 
