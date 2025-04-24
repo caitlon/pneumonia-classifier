@@ -21,13 +21,35 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         
+    - name: Debug repository structure
+      run: |
+        echo "Repository structure:"
+        ls -la
+        echo "pneumonia_classifier directory structure:"
+        ls -la pneumonia_classifier/
+        echo "Check for models directory:"
+        ls -la pneumonia_classifier/models/ || echo "Models directory not found"
+        
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         # Install CPU-only PyTorch to avoid CUDA dependencies
         pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+        
+        # Install package dependencies
+        pip install setuptools wheel
+        
+        # Try multiple installation methods to ensure it works
+        python setup.py develop
         pip install -e .
+        
         pip install pytest pytest-cov
+        
+        # Verify package installation
+        python -c "import pneumonia_classifier; print('Package successfully imported')"
+        python -c "import pneumonia_classifier.models; print('Models module successfully imported')"
+        python -c "import pneumonia_classifier.models.resnet; print('Resnet module successfully imported')"
+        python -c "import sys; print(sys.path)"
         
     - name: Test with pytest
       run: |
