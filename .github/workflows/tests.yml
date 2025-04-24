@@ -2,54 +2,33 @@ name: Run Tests
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    
-    env:
-      CUDA_VISIBLE_DEVICES: ""
-      PYTHONWARNINGS: "ignore::UserWarning"
-      # Force PyTorch to use CPU only
-      FORCE_CUDA: "0"
-      USE_CUDA: "0"
-      PYTORCH_ENABLE_MPS_FALLBACK: "1"
-    
+    strategy:
+      matrix:
+        python-version: [3.9]
+
     steps:
     - uses: actions/checkout@v3
     
-    - name: Set up Python
+    - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
-        python-version: '3.9'
+        python-version: ${{ matrix.python-version }}
         
-    - name: Install Poetry
-      run: |
-        curl -sSL https://install.python-poetry.org | python3 -
-    
     - name: Install dependencies
       run: |
-        # Install minimal dependencies for linting and type checking
-        poetry config virtualenvs.create false
-        # Install remaining dependencies
-        poetry install
-        
-    - name: Lint with flake8
-      continue-on-error: true  # Make this step optional
-      run: |
-        poetry run flake8 pneumonia_classifier scripts tests
-        
-    - name: Type check with mypy
-      continue-on-error: true  # Make this step optional
-      run: |
-        poetry run mypy pneumonia_classifier scripts
+        python -m pip install --upgrade pip
+        # Install CPU-only PyTorch to avoid CUDA dependencies
+        pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+        pip install -e .
+        pip install pytest pytest-cov
         
     - name: Test with pytest
-      continue-on-error: true  # Make this step optional too
       run: |
-        echo "NOTE: Tests are skipped in CI due to CUDA issues in GitHub runners"
-        echo "Please run tests locally with: poetry run pytest tests"
-        echo "Mock test to prevent CI failure"
-        # Not actually running tests due to CUDA issues
-        # poetry run pytest tests -v 
+        python -m pytest 

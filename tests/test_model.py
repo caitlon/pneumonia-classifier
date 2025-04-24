@@ -1,18 +1,16 @@
 """Tests for the pneumonia classification model."""
 
-# Set environment variables to disable CUDA before importing anything
-import os
-os.environ['CUDA_VISIBLE_DEVICES'] = ''
-os.environ['FORCE_CUDA'] = '0'
-os.environ['USE_CUDA'] = '0'
-
 from pathlib import Path
+import io
 
 import torch
 import torch.nn as nn
+import pytest
+from PIL import Image
 
 from pneumonia_classifier.models.resnet import create_model, load_model, predict
 from pneumonia_classifier.utils import save_model
+
 
 def test_create_model() -> None:
     """Test model creation."""
@@ -30,7 +28,7 @@ def test_create_model() -> None:
     assert output.shape == (1, 2)
 
 
-def test_save_and_load_model(tmp_path: Path) -> None:
+def test_save_and_load_model(tmp_path: Path, cpu_device: torch.device) -> None:
     """Test saving and loading the model."""
     # Create model
     model = create_model()
@@ -42,8 +40,8 @@ def test_save_and_load_model(tmp_path: Path) -> None:
     # Check that the file exists
     assert model_path.exists()
 
-    # Load model - explicitly specifying CPU device
-    loaded_model = load_model(str(model_path), device="cpu")
+    # Load model - using device fixture
+    loaded_model = load_model(str(model_path), device=str(cpu_device))
 
     # Check model type
     assert isinstance(loaded_model, nn.Module)
@@ -58,7 +56,7 @@ def test_save_and_load_model(tmp_path: Path) -> None:
     assert output.shape == (1, 2)
 
 
-def test_predict() -> None:
+def test_predict(cpu_device: torch.device) -> None:
     """Test prediction function."""
     # Create model
     model = create_model()
@@ -66,8 +64,8 @@ def test_predict() -> None:
     # Create test input
     test_input = torch.randn(1, 3, 224, 224)
 
-    # Perform prediction - explicitly specifying CPU device
-    result = predict(test_input, model=model, device="cpu")
+    # Perform prediction - using device fixture
+    result = predict(test_input, model=model, device=str(cpu_device))
 
     # Check result structure
     assert "class_name" in result
@@ -82,3 +80,25 @@ def test_predict() -> None:
     # Check value ranges
     assert 0 <= result["class_id"] <= 1
     assert 0 <= result["probability"] <= 1
+
+
+# Parameterized test for testing different image sizes
+@pytest.mark.parametrize("image_size", [(224, 224), (256, 256), (196, 196)])
+def test_model_different_image_sizes(image_size: tuple[int, int], cpu_device: torch.device) -> None:
+    """Test model with different image sizes."""
+    model = create_model()
+    
+    # Create test image of specified size
+    width, height = image_size
+    img = Image.new("RGB", (width, height), color="white")
+    
+    # Convert to tensor
+    img_tensor = torch.zeros((1, 3, height, width), dtype=torch.float32)
+    
+    # Get prediction
+    result = predict(img_tensor, model=model, device=str(cpu_device))
+    
+    # Check result structure
+    assert "class_name" in result
+    assert "class_id" in result
+    assert "probability" in result

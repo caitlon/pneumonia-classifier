@@ -1,11 +1,5 @@
 """Tests for the pneumonia classification API."""
 
-# Set environment variables to disable CUDA before importing anything
-import os
-os.environ['CUDA_VISIBLE_DEVICES'] = ''
-os.environ['FORCE_CUDA'] = '0'
-os.environ['USE_CUDA'] = '0'
-
 import io
 from typing import Any
 
@@ -17,6 +11,7 @@ from PIL import Image
 from pneumonia_classifier.api.main import app
 from pneumonia_classifier.models.resnet import create_model
 
+
 @pytest.fixture
 def client() -> TestClient:
     """Test client for the API."""
@@ -24,12 +19,11 @@ def client() -> TestClient:
 
 
 @pytest.fixture
-def mock_model(monkeypatch: pytest.MonkeyPatch) -> Any:
+def mock_model(monkeypatch: pytest.MonkeyPatch, cpu_device: torch.device) -> Any:
     """Mock model for testing."""
-    # Create model - explicitly specifying CPU usage
-    torch.set_default_tensor_type('torch.FloatTensor')  # Using CPU tensors
+    # Create model - используя CPU
     test_model = create_model()
-    test_model = test_model.to("cpu")
+    test_model = test_model.to(cpu_device)
 
     # Mock predictions to return higher probability for Pneumonia (class 1)
     def mock_forward(*args: Any, **kwargs: Any) -> torch.Tensor:
@@ -42,7 +36,7 @@ def mock_model(monkeypatch: pytest.MonkeyPatch) -> Any:
     # Replace global model
     monkeypatch.setattr("pneumonia_classifier.api.main.model", test_model)
     
-    monkeypatch.setattr("pneumonia_classifier.utils.get_device", lambda: torch.device("cpu"))
+    monkeypatch.setattr("pneumonia_classifier.utils.get_device", lambda: cpu_device)
 
     return test_model
 
@@ -63,13 +57,10 @@ def test_health_endpoint(client: TestClient, mock_model: Any) -> None:
     assert response.json() == {"status": "healthy"}
 
 
-def test_predict_endpoint(client: TestClient, mock_model: Any) -> None:
+def test_predict_endpoint(client: TestClient, mock_model: Any, get_test_image_bytes: bytes) -> None:
     """Test prediction endpoint."""
-    # Create artificial image
-    img = Image.new("RGB", (100, 100), color="white")
-    img_byte_arr = io.BytesIO()
-    img.save(img_byte_arr, format="JPEG")
-    img_byte_arr.seek(0)
+    # Use fixture to get test image
+    img_byte_arr = io.BytesIO(get_test_image_bytes)
 
     # Send request
     response = client.post(
@@ -110,3 +101,45 @@ def test_predict_wrong_file_type(client: TestClient, mock_model: Any) -> None:
     data = response.json()
     assert "detail" in data
     assert "image" in data["detail"]
+
+
+# Parameterized test for different image formats
+@pytest.mark.parametrize("image_format", ["JPEG", "PNG", "BMP"])
+def test_predict_different_image_formats(
+    client: TestClient, 
+    mock_model: Any, 
+    image_format: str
+) -> None:
+    """Test prediction with different image formats."""
+    # Create image of the specified format
+    img = Image.new("RGB", (100, 100), color="white")
+    img_byte_arr = io.BytesIO()
+    img.save(img_byte_arr, format=image_format)
+    img_byte_arr.seek(0)
+    
+    # Define MIME type
+    mime_types = {
+        "JPEG": "image/jpeg",
+        "PNG": "image/png",
+        "BMP": "image/bmp"
+    }
+    
+    # Send request
+    response = client.post(
+        "/predict", 
+        files={"file": (f"test.{image_format.lower()}", img_byte_arr, mime_types[image_format])}
+    )
+    
+    # Check response
+    assert response.status_code == 200
+    data = response.json()
+    
+    # Check response structure
+    assert "class_name" in data
+    assert "class_id" in data
+    assert "probability" in data
+    
+    # Check response content
+    assert data["class_name"] == "Pneumonia"  # Should match the mock
+    assert data["class_id"] == 1
+    assert data["content_type"] == mime_types[image_format]
